@@ -32,18 +32,18 @@ steps_per_day <- sapply(data_by_date, function(x) sum(x$steps, na.rm = TRUE))
 # make data tidy
 steps_per_day <- data.frame(date = names(steps_per_day), steps=steps_per_day, row.names = NULL)
 
-mean_steps_per_day <- mean(steps_per_day$steps)
+mean_steps_per_day <- round(mean(steps_per_day$steps))
 
-median_steps_per_day <- median(steps_per_day$steps)
+median_steps_per_day <- round(median(steps_per_day$steps))
 
-qplot(steps_per_day$steps, geom="histogram") + xlab("steps")
+qplot(steps_per_day$steps, geom="histogram") + xlab("steps") + ylab("days") + ggtitle("Steps per day") + scale_x_continuous(breaks = seq(0, 25000, by = 5000))
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
 
-Mean of totl number of steps per day is  9354.2295082
+Mean of totl number of steps per day is  9354
 
-Median of totl number of steps per day is  10395
+Median of totl number of steps per day is  1.0395\times 10^{4}
 
 ## What is the average daily activity pattern?
 
@@ -62,7 +62,7 @@ steps_per_interval <- data.frame(interval = names(steps_per_interval), steps=ste
 steps_per_interval$interval <- as.numeric(as.character(steps_per_interval$interval))
 
 # draw  time series plot
-plot(steps_per_interval)
+plot(steps_per_interval, main = "5 minutes interval")  
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
@@ -108,16 +108,16 @@ steps_per_day_new <- sapply(data_by_date_new, function(x) sum(x$steps, na.rm = T
 # make data tidy
 steps_per_day_new <- data.frame(date = names(steps_per_day_new), steps=steps_per_day_new, row.names = NULL)
 
-mean_steps_per_day_new <- mean(steps_per_day_new$steps)
+mean_steps_per_day_new <- round(mean(steps_per_day_new$steps))
 
-median_steps_per_day_new <- median(steps_per_day_new$steps)
+median_steps_per_day_new <- round(median(steps_per_day_new$steps))
 
-qplot(steps_per_day_new$steps, geom="histogram") +  xlab("steps")
+qplot(steps_per_day_new$steps, geom="histogram") +  xlab("steps") + ggtitle("Steps per day (Fill Missing Value)")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
 
-Mean of totl number (NA processed) of steps per day is  10765.6393443 while old mean is 9354.2295082
+Mean of totl number (NA processed) of steps per day is  10766 while old mean is 9354
 
 Median of totl number (NA processed) of steps per day is  10762 while old median is  10395
 
@@ -155,9 +155,6 @@ new_data$day <- as.factor(new_data$day)
 
 data_by_weekday <- split(new_data, new_data$day)
 
-
-
-
 caculate_interval_patern <- function(d) {
   
   fi <- split(d, d$interval)
@@ -176,12 +173,23 @@ caculate_interval_patern <- function(d) {
 
 weekday_patern <- caculate_interval_patern(data_by_weekday$weekday)
 
+weekday_patern$status <- as.factor("Weekday")
+
 weekend_patern <- caculate_interval_patern(data_by_weekday$weekend)
 
+weekend_patern$status <- as.factor("Weekend")
+
+week_active_total <- rbind(weekday_patern, weekend_patern)
+
 # plot differnt
-par(mfrow = c(2,1))
-plot(weekday_patern, type = "l", xlab = "interval", ylab= "Number of steps", main = "weekday")
-plot(weekend_patern, type = "l", xlab = "interval", ylab= "Number of steps", main = "weekend")
+#par(mfrow = c(2,1))
+#plot(weekday_patern, type = "l", xlab = "interval", ylab= "Number of steps", main = "weekday")
+#plot(weekend_patern, type = "l", xlab = "interval", ylab= "Number of steps", main = "weekend")
+
+library(lattice)
+
+xyplot(steps ~ interval | status, week_active_total, type = "l", layout = c(1, 2), 
+    xlab = "Interval", ylab = "Number of steps")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
